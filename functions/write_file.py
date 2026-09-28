@@ -1,5 +1,26 @@
 import os
 
+schema_write_file = {
+    "type": "function",
+    "function": {
+        "name": "write_file",
+        "description": "Writes to a file in a specified directory relative to the working directory. If file doesn't exist, it will be created before writing",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "file_path": {
+                    "type": "string",
+                    "description": "File path to which to write the file, relative to the working directory (default is the working directory itself)",
+                },
+                "content": {
+                    "type": "string",
+                    "description": "Text that will replace any existing text in the file",
+                },
+            },
+        },
+    },
+}
+
 def write_file(working_directory: str, file_path: str, content: str) -> str:
     result = f"Result for {file_path} file"
 
@@ -14,8 +35,7 @@ def write_file(working_directory: str, file_path: str, content: str) -> str:
         return result + f'\n\tError: Cannot write to "{file_path}" as it is outside the permitted working directory'
 
     # make sure file path exists
-    if not os.path.exists(target_file_path):
-        os.makedirs(os.path.dirname(target_file_path), exist_ok=True)
+    os.makedirs(os.path.dirname(target_file_path), exist_ok=True)
 
     try:
         with open(target_file_path, "w") as f:

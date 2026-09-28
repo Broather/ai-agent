@@ -4,13 +4,15 @@ import sys
 from pkg.calculator import Calculator
 from pkg.render import format_json_output
 
+def assistance():
+    print("Calculator App")
+    print('Usage: python main.py "<expression>"')
+    print('Example: python main.py "3 + 5"')
 
 def main() -> None:
     calculator = Calculator()
     if len(sys.argv) <= 1:
-        print("Calculator App")
-        print('Usage: python main.py "<expression>"')
-        print('Example: python main.py "3 + 5"')
+        assistance()
         return
 
     expression = " ".join(sys.argv[1:])
@@ -21,9 +23,10 @@ def main() -> None:
             print(to_print)
         else:
             print("Error: Expression is empty or contains only whitespace.")
+            assistance()
     except Exception as e:
         print(f"Error: {e}")
-
+        assistance()
 
 if __name__ == "__main__":
     main()

@@ -47,29 +47,35 @@ def main():
         api_key=api_key
     )
 
-    response = generate_content(client, messages, available_functions)
+    for _ in range(20):
+        response = generate_content(client, messages, available_functions)
 
-    if is_verbose:
-        print(f"User prompt: {prompt}")
-        print(f"Model used: {response.model}")
-        if response.usage:
-            print(f"Prompt tokens: {response.usage.prompt_tokens}")
-            print(f"Response tokens: {response.usage.completion_tokens}")
+        if is_verbose:
+            print(f"User prompt: {prompt}")
+            print(f"Model used: {response.model}")
+            if response.usage:
+                print(f"Prompt tokens: {response.usage.prompt_tokens}")
+                print(f"Response tokens: {response.usage.completion_tokens}")
+            else:
+                raise RuntimeError("Response doen not have a usage property")
+
+        message = response.choices[0].message
+        messages.append(message) # type: ignore
+
+        if message.tool_calls:
+            for tool_call in message.tool_calls:
+                result_message = call_function(tool_call, is_verbose)
+                messages.append(result_message)
+                if len(result_message["content"]) == 0:
+                    raise RuntimeError("Result content is empty")
+                if is_verbose:
+                    print(f"-> {result_message['content']}")
         else:
-            raise RuntimeError("Response doen not have a usage property")
-
-    print("Response:")
-    message = response.choices[0].message
-    
-    if message.tool_calls:
-        for tool_call in message.tool_calls:
-            result_message = call_function(tool_call, is_verbose)
-            if len(result_message["content"]) == 0:
-                raise RuntimeError("Result content is empty")
-            if is_verbose:
-                print(f"-> {result_message['content']}")
-    else:
-        print(message.content)
+            print("Final response")
+            print(message.content)
+            exit(0)
+    print("Maximum iterations reached")
+    exit(1)
 
 if __name__ == "__main__":
     main()
